@@ -1,0 +1,84 @@
+$boxBackground: rgb(34, 38, 47);
+$background: rgb(16, 16, 18);
+$titleBackground: rgb(67, 73, 88);
+$titleBorder: rgb(87, 97, 114);
+
+html {
+  background-color: $background;
+  color: white;
+}
+
+body {
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.v8-wrapper {
+  padding: 25px 0;
+}
+
+.box {
+  background-color: $boxBackground;
+  position: relative;
+  padding: 12px;
+  min-width: 100px;
+  min-height: 200px;
+  border-radius: 16px;
+}
+
+.title-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -25px;
+  left: 0;
+  width: 100%;
+}
+.title {
+  background-color: $titleBackground;
+  border: 2px solid $titleBorder;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;
+  width: 170px;
+}
+
+#stack {
+  border: 5px solid red;
+  width: 300px;
+  height: 400px;
+}
+
+#web-apis {
+  border: 5px solid blue;
+  width: 300px;
+  height: 400px;
+}
+
+#stack-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+#project-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+#editor {
+  border: 5px solid green;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 4px;
+  height: 400px;
+  width: 400px;
+  flex-grow: 1;
+  background-color: $boxBackground;
+}

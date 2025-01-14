@@ -1,0 +1,25 @@
+{
+  "name": "event-loop",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "sass-embedded": "^1.83.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@ddietr/codemirror-themes": "^1.5.1",
+    "@types/highlight.js": "^10.1.0",
+    "acorn": "^8.14.0",
+    "codemirror": "^6.0.1",
+    "debounce": "^2.2.0",
+    "highlight.js": "^11.11.1",
+    "vite": "^6.0.7"
+  },
+  "scripts": {
+    "start": "vite"
+  }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>vite test</title>
+    <link rel="stylesheet" href="/src/styles/index.scss" />
+  </head>
+  <body>
+    <div id="project-wrapper">
+      <div id="editor"></div>
+
+      <div class="v8-wrapper">
+        <div id="stack-wrapper">
+          <div class="box" id="stack">
+            <div class="title-wrapper">
+              <div class="title">Call Stack</div>
+            </div>
+          </div>
+          <div class="box" id="web-apis">
+            <div class="title-wrapper">
+              <div class="title">Web APIs</div>
+            </div>
+          </div>
+          <!-- <div id="callback-queue">
+        <div id="event-loop"></div>
+        <div id="queue-wrapper">
+          <div id="task-queue" class="box"></div>
+          <div id="micro-task-queue" class="box"></div>
+        </div>
+      </div> -->
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script type="module" src="/index.ts"></script>
+</html>

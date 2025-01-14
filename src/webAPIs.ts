@@ -1,3 +1,3 @@
-class Browser {
+class WebAPIs {
   constructor() {}
 }

@@ -1,0 +1,175 @@
+@import url("../../node_modules/highlight.js/styles/atom-one-dark.css");
+
+$boxBackground: rgb(34, 38, 47);
+$background: rgb(16, 16, 18);
+$titleBackground: rgb(67, 73, 88);
+$titleBorder: rgb(87, 97, 114);
+
+html {
+  background-color: $background;
+  color: white;
+}
+
+body {
+  padding: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.box {
+  background-color: $boxBackground;
+  position: relative;
+  padding: 12px;
+  min-width: 100px;
+  min-height: 200px;
+  border-radius: 16px;
+}
+
+.title-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -25px;
+  left: 0;
+  width: 100%;
+}
+.title {
+  background-color: $titleBackground;
+  border: 2px solid $titleBorder;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;
+  width: 170px;
+}
+
+#stack {
+  border: 5px solid red;
+  width: 300px;
+  height: 400px;
+}
+
+#stack-items-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  flex-direction: column-reverse;
+}
+
+#web-apis {
+  border: 5px solid blue;
+  width: 300px;
+  height: 400px;
+}
+
+#runtime-top-wrapper {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+#project-top-wrapper {
+  padding-top: 15px;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+#editor-wrapper {
+  border: 5px solid green;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 4px;
+  height: 390px;
+  width: 100%;
+  min-width: 400px;
+  background-color: $boxBackground;
+}
+
+#editor-wrapper {
+  flex-grow: 1;
+  div#button-wrapper {
+    margin-top: 8px;
+    text-align: right;
+    button {
+      padding: 8px;
+      width: 100px;
+      cursor: pointer;
+    }
+  }
+}
+
+#editor {
+  height: 320px;
+  overflow: auto;
+}
+
+#runtime-bottom-wrapper {
+  @extend #runtime-top-wrapper;
+  flex-wrap: wrap;
+  height: 400px;
+  width: 640px;
+  overflow: hidden;
+}
+
+#project-bottom-wrapper {
+  @extend #project-top-wrapper;
+  justify-content: space-between;
+}
+
+#console {
+  height: 400px;
+  min-width: 500px;
+  max-width: 570px;
+  border:5px solid orange;
+  .item-wrapper {
+    padding-top: 8px;
+    overflow: auto;
+    height: 100%;
+    & > * + * {
+      border-top: 1px solid $titleBorder;
+    }
+    & > * {
+      padding: 8px;
+    }
+  }
+
+
+}
+
+#task-queue {
+  width: 100%;
+  min-height: 100px !important;
+  border-radius: 8px;
+  border: 5px solid pink;
+}
+
+#micro-task-queue {
+  @extend #task-queue;
+  border: 5px solid purple;
+}
+
+#event-loop {
+  flex-grow: 12;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.stack-element {
+  background-color: $background;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 4px;
+  width: 98%;
+  border: 1px solid $titleBorder;
+}

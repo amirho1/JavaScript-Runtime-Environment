@@ -4,31 +4,58 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>vite test</title>
-    <link rel="stylesheet" href="/src/styles/index.scss" />
+    <link rel="stylesheet" href="/public/styles/index.scss" />
   </head>
   <body>
-    <div id="project-wrapper">
-      <div id="editor"></div>
-
-      <div class="v8-wrapper">
-        <div id="stack-wrapper">
-          <div class="box" id="stack">
-            <div class="title-wrapper">
-              <div class="title">Call Stack</div>
-            </div>
-          </div>
-          <div class="box" id="web-apis">
-            <div class="title-wrapper">
-              <div class="title">Web APIs</div>
-            </div>
-          </div>
-          <!-- <div id="callback-queue">
-        <div id="event-loop"></div>
-        <div id="queue-wrapper">
-          <div id="task-queue" class="box"></div>
-          <div id="micro-task-queue" class="box"></div>
+    <div id="project-top-wrapper">
+      <div id="editor-wrapper">
+        <div id="editor"></div>
+        <div id="button-wrapper">
+          <button id="run">Run</button>
         </div>
-      </div> -->
+      </div>
+
+      <div id="runtime-top-wrapper">
+        <div class="box" id="stack">
+          <div class="title-wrapper">
+            <div class="title">Call Stack</div>
+          </div>
+
+          <div id="stack-items-wrapper"></div>
+        </div>
+        <div class="box" id="web-apis">
+          <div class="title-wrapper">
+            <div class="title">Web APIs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="project-bottom-wrapper">
+      <div class="box" id="console">
+        <div class="title-wrapper">
+          <div class="title">Console</div>
+        </div>
+
+        <div class="item-wrapper">
+        </div>
+      </div>
+      <div id="runtime-bottom-wrapper">
+        <div id="event-loop">
+          Event Loop
+          <img width="50" height="50" src="/rotate.svg" alt="javascript event loop rotate" />
+        </div>
+
+        <div class="box" id="task-queue">
+          <div class="title-wrapper">
+            <div class="title">Task Queue</div>
+          </div>
+        </div>
+
+        <div class="box" id="micro-task-queue">
+          <div class="title-wrapper">
+            <div class="title">Micro Task Queue</div>
+          </div>
         </div>
       </div>
     </div>

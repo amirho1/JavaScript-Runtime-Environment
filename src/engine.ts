@@ -116,19 +116,19 @@ export class Engine {
       throw new Error("Maximum call stack size exceeded");
     }
     const topItem = this.stack.peek();
-    if (
-      this.isConsoleLog(topItem) &&
-      this.console &&
-      topItem.type === "ExpressionStatement" &&
-      topItem.expression.type === "CallExpression"
-    ) {
-      this.console.log(this.extractArgumentsFromCallExpression(topItem.expression));
+
+    if (this.isConsoleLog(topItem)) {
       this.ui?.callStackIsRunning();
 
       setTimeout(() => {
         this.ui?.callStackStopped();
         this.stack.pop();
-        console.log("stack", this.stack, "here after 500", this.stack.pop);
+        if (
+          this.console &&
+          topItem.type === "ExpressionStatement" &&
+          topItem.expression.type === "CallExpression"
+        )
+          this.console.log(this.extractArgumentsFromCallExpression(topItem.expression));
       }, 1000);
     } else if (
       topItem.type === "ExpressionStatement" &&

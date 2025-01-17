@@ -1,7 +1,7 @@
 import Stack from "./Stack";
 import * as acorn from "acorn";
 import * as astring from "astring";
-import { Console } from "./types";
+import { Console, EngineParams, UI } from "./types";
 
 export class Engine {
   private stack: Stack<acorn.Statement>;
@@ -9,10 +9,12 @@ export class Engine {
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 100;
   private console: Console | undefined;
+  private ui: UI | undefined;
 
-  constructor(stack: Stack<acorn.Statement>, console: Console) {
+  constructor({ stack, console, ui }: EngineParams) {
     this.stack = stack;
     this.console = console;
+    this.ui = ui;
   }
 
   run(code: string) {
@@ -109,7 +111,7 @@ export class Engine {
     });
   }
 
-  codeRunner() {
+  executeTopStackItem() {
     if (this.stack.size() > this.stackOverFlowSize) {
       throw new Error("Maximum call stack size exceeded");
     }
@@ -121,6 +123,13 @@ export class Engine {
       topItem.expression.type === "CallExpression"
     ) {
       this.console.log(this.extractArgumentsFromCallExpression(topItem.expression));
+      this.ui?.callStackIsRunning();
+
+      setTimeout(() => {
+        this.ui?.callStackStopped();
+        this.stack.pop();
+        console.log("stack", this.stack, "here after 500", this.stack.pop);
+      }, 1000);
     } else if (
       topItem.type === "ExpressionStatement" &&
       topItem.expression.type === "CallExpression"
@@ -131,7 +140,7 @@ export class Engine {
 
   handleExpressionStatement(statement: acorn.Statement) {
     this.stack.push(statement);
-    this.codeRunner();
+    this.executeTopStackItem();
   }
 
   handleVariableDeclaration(_statement: acorn.Statement) {

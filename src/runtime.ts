@@ -7,7 +7,7 @@ import { Statement } from "acorn";
 import * as astring from "astring";
 import hljs from "highlight.js";
 import javascript from "highlight.js/lib/languages/javascript";
-import { Console } from "./types";
+import { Console, UI } from "./types";
 
 hljs.registerLanguage("javascript", javascript);
 
@@ -29,11 +29,23 @@ export default class Runtime {
     },
   };
 
+  private ui: UI = {
+    addClass(selector, classname) {
+      document.querySelector(selector)?.classList.add(classname);
+    },
+    callStackIsRunning() {
+      this.addClass("#stack .backdrop", "d-flex");
+    },
+    callStackStopped() {
+      document.querySelector("#stack .backdrop")?.classList.remove("d-flex");
+    },
+  };
+
   constructor(editor: EditorView) {
     this.stack = new Stack<Statement>();
     this.taskQueue = new Queue();
     this.microTaskQueue = new Queue();
-    this.engine = new Engine(this.stack, this.console);
+    this.engine = new Engine({ stack: this.stack, console: this.console, ui: this.ui });
     this.eventLoop = new EventLoop();
     this.editor = editor;
 
@@ -66,6 +78,7 @@ export default class Runtime {
   }
 
   removeElementFromCallStackUI() {
-    return;
+    document.getElementById("stack-items-wrapper")?.lastChild?.remove();
+    this.ui.callStackStopped();
   }
 }

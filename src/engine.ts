@@ -7,7 +7,7 @@ export class Engine {
   private stack: Stack<acorn.Statement>;
   private iterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
-  private stackOverFlowSize = 100;
+  private stackOverFlowSize = 20;
   private console: Console | undefined;
   private ui: UI | undefined;
 
@@ -15,6 +15,18 @@ export class Engine {
     this.stack = stack;
     this.console = console;
     this.ui = ui;
+
+    this.clearStack = this.clearStack.bind(this);
+    this.stack.onPop(() => {
+      const iterator = this.clearStack();
+      const iterate = () => {
+        const result = iterator.next();
+        if (!result.done) {
+          result.value.then(iterate);
+        }
+      };
+      iterate();
+    });
   }
 
   run(code: string) {
@@ -30,7 +42,12 @@ export class Engine {
         //   yield this.handleVariableDeclaration(statement);
         //   break;
         case "ExpressionStatement":
-          yield this.handleExpressionStatement(statement);
+          this.ui?.callStackIsRunning();
+
+          yield new Promise(resolve => {
+            this.handleExpressionStatement(statement);
+            resolve(true);
+          });
           break;
 
         // case "IfStatement":
@@ -111,17 +128,29 @@ export class Engine {
     });
   }
 
+  *clearStack() {
+    while (this.stack.size() > 0) {
+      this.ui?.callStackIsRunning();
+
+      yield new Promise(resolve => {
+        setTimeout(() => {
+          this.stack.pop();
+          this.ui?.callStackStopped();
+          resolve(true);
+        }, 1000);
+      });
+    }
+  }
+
   executeTopStackItem() {
     if (this.stack.size() > this.stackOverFlowSize) {
+      this.ui?.callStackStopped();
       throw new Error("Maximum call stack size exceeded");
     }
     const topItem = this.stack.peek();
 
     if (this.isConsoleLog(topItem)) {
-      this.ui?.callStackIsRunning();
-
       setTimeout(() => {
-        this.ui?.callStackStopped();
         this.stack.pop();
         if (
           this.console &&
@@ -139,8 +168,10 @@ export class Engine {
   }
 
   handleExpressionStatement(statement: acorn.Statement) {
-    this.stack.push(statement);
-    this.executeTopStackItem();
+    return setTimeout(() => {
+      this.stack.push(statement);
+      this.executeTopStackItem();
+    }, 1000);
   }
 
   handleVariableDeclaration(_statement: acorn.Statement) {

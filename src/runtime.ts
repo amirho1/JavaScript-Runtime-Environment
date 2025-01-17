@@ -11,6 +11,33 @@ import { Console, UI } from "./types";
 
 hljs.registerLanguage("javascript", javascript);
 
+class Ui implements UI {
+  constructor() {
+    this.addClass = this.addClass.bind(this);
+    this.removeClass = this.removeClass.bind(this);
+    this.callStackIsRunning = this.callStackIsRunning.bind(this);
+    this.callStackStopped = this.callStackStopped.bind(this);
+  }
+
+  addClass(selector: string, classname: string) {
+    const bd = document.querySelector(selector);
+    bd?.classList.add(classname);
+  }
+
+  removeClass(selector: string, classname: string) {
+    const bd = document.querySelector(selector);
+    bd?.classList.remove(classname);
+  }
+
+  callStackIsRunning() {
+    this.addClass("#stack .backdrop", "d-flex");
+  }
+
+  callStackStopped() {
+    this.removeClass("#stack .backdrop", "d-flex");
+  }
+}
+
 export default class Runtime {
   private stack: Stack<Statement>;
   private taskQueue: Queue;
@@ -29,17 +56,7 @@ export default class Runtime {
     },
   };
 
-  private ui: UI = {
-    addClass(selector, classname) {
-      document.querySelector(selector)?.classList.add(classname);
-    },
-    callStackIsRunning() {
-      this.addClass("#stack .backdrop", "d-flex");
-    },
-    callStackStopped() {
-      document.querySelector("#stack .backdrop")?.classList.remove("d-flex");
-    },
-  };
+  private ui = new Ui();
 
   constructor(editor: EditorView) {
     this.stack = new Stack<Statement>();
@@ -67,7 +84,6 @@ export default class Runtime {
   addElementFromCallStackToUI() {
     const element = document.getElementById("stack-items-wrapper");
     const funcElement = document.createElement("div");
-
     const code = astring.generate(this.stack.peek());
     const highlightedCode = hljs.highlight(code, { language: "javascript" }).value;
 
@@ -75,10 +91,12 @@ export default class Runtime {
     funcElement?.classList.add("stack-element");
 
     element?.appendChild(funcElement);
+    funcElement.scrollIntoView();
+    // this.ui.callStackStopped();
   }
 
   removeElementFromCallStackUI() {
     document.getElementById("stack-items-wrapper")?.lastChild?.remove();
-    this.ui.callStackStopped();
+    // this.ui.callStackStopped();
   }
 }

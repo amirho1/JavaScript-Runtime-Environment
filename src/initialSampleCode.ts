@@ -21,3 +21,21 @@ function two() {
 };
 
 one();`;
+
+export const setTimeoutCodeSnippet = `setTimeout(() => {
+  console.log("Timeout function");
+}, 0);
+
+console.log("End of script");`;
+
+export const sampleCode2 = `function one() {
+  console.log('hello from one')
+}
+
+function two() {
+  console.log('hello from two')
+}
+
+one();
+two();
+`;

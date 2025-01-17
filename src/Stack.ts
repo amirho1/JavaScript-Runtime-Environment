@@ -36,6 +36,15 @@ export default class Stack<T> {
    */
   constructor(...args: T[]) {
     this.stack = args;
+    this.pop = this.pop.bind(this);
+    this.peek = this.peek.bind(this);
+    this.isEmpty = this.isEmpty.bind(this);
+    this.size = this.size.bind(this);
+    this.onPush = this.onPush.bind(this);
+    this.onPop = this.onPop.bind(this);
+    this.handlePushEvents = this.handlePushEvents.bind(this);
+    this.handlePopEvents = this.handlePopEvents.bind(this);
+    this.clear = this.clear.bind(this);
   }
 
   /**

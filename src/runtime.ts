@@ -8,11 +8,13 @@ import * as astring from "astring";
 import hljs from "highlight.js";
 import javascript from "highlight.js/lib/languages/javascript";
 import { Console, UI } from "./types";
+import ExplosiveButton from "./explosion";
 
 hljs.registerLanguage("javascript", javascript);
 
-class Ui implements UI {
-  constructor() {
+class Ui extends ExplosiveButton implements UI {
+  constructor(selector: string) {
+    super(selector);
     this.addClass = this.addClass.bind(this);
     this.removeClass = this.removeClass.bind(this);
     this.callStackIsRunning = this.callStackIsRunning.bind(this);
@@ -56,7 +58,7 @@ export default class Runtime {
     },
   };
 
-  private ui = new Ui();
+  private ui = new Ui("#stack");
 
   constructor(editor: EditorView) {
     this.stack = new Stack<Statement>();

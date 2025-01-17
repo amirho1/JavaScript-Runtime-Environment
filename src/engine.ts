@@ -10,6 +10,7 @@ export class Engine {
   private stackOverFlowSize = 20;
   private console: Console | undefined;
   private ui: UI | undefined;
+  private timeout = 100;
 
   constructor({ stack, console, ui }: EngineParams) {
     this.stack = stack;
@@ -137,7 +138,7 @@ export class Engine {
           this.stack.pop();
           this.ui?.callStackStopped();
           resolve(true);
-        }, 1000);
+        }, this.timeout);
       });
     }
   }
@@ -145,6 +146,7 @@ export class Engine {
   executeTopStackItem() {
     if (this.stack.size() > this.stackOverFlowSize) {
       this.ui?.callStackStopped();
+      this.ui?.explode(2000);
       throw new Error("Maximum call stack size exceeded");
     }
     const topItem = this.stack.peek();
@@ -158,7 +160,7 @@ export class Engine {
           topItem.expression.type === "CallExpression"
         )
           this.console.log(this.extractArgumentsFromCallExpression(topItem.expression));
-      }, 1000);
+      }, this.timeout);
     } else if (
       topItem.type === "ExpressionStatement" &&
       topItem.expression.type === "CallExpression"
@@ -171,7 +173,7 @@ export class Engine {
     return setTimeout(() => {
       this.stack.push(statement);
       this.executeTopStackItem();
-    }, 1000);
+    }, this.timeout);
   }
 
   handleVariableDeclaration(_statement: acorn.Statement) {

@@ -1,0 +1,34 @@
+/* this was copied from https://codepen.io/jkantner/pen/oNjjEaJ and was edited a little bit */
+
+.exploding,
+.exploding:focus,
+.exploding:hover {
+  background: transparent;
+  color: transparent;
+}
+.exploding {
+  pointer-events: none;
+  position: relative;
+  will-change: transform;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.particle {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.particle--debris {
+  background: #255ff4;
+}
+.particle--fire {
+  border-radius: 50%;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #17181c;
+  }
+}

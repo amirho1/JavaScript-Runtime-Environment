@@ -2,7 +2,7 @@ export interface Console {
   log: (...args: any[]) => void;
 }
 
-export interface UI {
+export interface UI extends ExplosiveButton {
   addClass: (selector: string, classname: string) => void;
   callStackIsRunning: () => void;
   callStackStopped: () => void;

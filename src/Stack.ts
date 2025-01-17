@@ -2,11 +2,11 @@
  * A class representing a stack data structure.
  *
  * @class Stack
- * @template T - The type of elements held in the stack.
+ * @template T - The type of items held in the stack.
  */
-export default class Stack {
+export default class Stack<T> {
   /**
-   * The internal array that holds the stack elements.
+   * The internal array that holds the stack items.
    *
    * @private
    * @type {T[]}
@@ -14,39 +14,60 @@ export default class Stack {
   private stack: any[] = [];
 
   /**
+   * The internal array that holds the subscribed events for push.
+   *
+   * @private
+   * @type {Function[]}
+   */
+  private pushEvents: Function[] = [];
+
+  /**
+   * The internal array that holds the subscribed events for push.
+   *
+   * @private
+   * @type {Function[]}
+   */
+  private popEvents: Function[] = [];
+
+  /**
    * Creates an instance of Stack.
    *
-   * @param {...T[]} args - Initial elements to populate the stack.
+   * @param {...T[]} args - Initial items to populate the stack.
    */
-  constructor(...args: any[]) {
+  constructor(...args: T[]) {
     this.stack = args;
   }
 
   /**
-   * Adds an element to the top of the stack.
+   * Adds an item to the top of the stack.
    *
-   * @param {T} arg - The element to add.
+   * @param {T} arg - The item to add.
    * @returns {number} The new length of the stack.
    */
-  push(arg: any) {
-    return this.stack.push(arg);
+  push(arg: T) {
+    const length = this.stack.push(arg);
+    this.handlePushEvents();
+    this.handlePushEvents.bind(this);
+    return length;
   }
 
   /**
-   * Removes and returns the top element of the stack.
+   * Removes and returns the top item of the stack.
    *
-   * @returns {T | undefined} The removed element, or undefined if the stack is empty.
+   * @returns {T} The removed item, or undefined if the stack is empty.
    */
-  pop() {
-    return this.stack.pop();
+  pop(): T {
+    const item = this.stack.pop();
+    this.handlePopEvents();
+    return item;
   }
 
   /**
-   * Returns the top element of the stack without removing it.
+   * Returns the top item of the stack without removing it.
    *
-   * @returns {T | undefined} The top element, or undefined if the stack is empty.
+   * @returns {T} The top item, or undefined if the stack is empty.
    */
-  peek() {
+  peek(): T {
     return this.stack[this.stack.length - 1];
   }
 
@@ -60,11 +81,46 @@ export default class Stack {
   }
 
   /**
-   * Returns the number of elements in the stack.
+   * Returns the number of items in the stack.
    *
-   * @returns {number} The number of elements in the stack.
+   * @returns {number} The number of items in the stack.
    */
   size() {
     return this.stack.length;
+  }
+
+  /**
+   * Add callback to the pushEvents array.
+   */
+  onPush(fn: () => any) {
+    this.pushEvents.push(fn);
+  }
+
+  /**
+   * Add callback to the popEvents array.
+   */
+  onPop(fn: () => any) {
+    this.popEvents.push(fn);
+  }
+
+  /**
+   * Execute all the callbacks in the changeEvents array.
+   */
+  handlePushEvents() {
+    this.pushEvents.forEach(fn => fn());
+  }
+
+  /**
+   * Execute all the callbacks in the popEvents array.
+   */
+  handlePopEvents() {
+    this.popEvents.forEach(fn => fn());
+  }
+
+  /**
+   * Clear the stack.
+   */
+  clear() {
+    this.stack = [];
   }
 }

@@ -27,7 +27,7 @@ export default class Explosion {
     this.pieceHeight = this.height / this.piecesY;
   }
 
-  explode(duration) {
+  explode(duration = 1000) {
     let explodingState = "exploding";
     if (!this.element.classList.contains(explodingState)) {
       this.element.classList.add(explodingState);

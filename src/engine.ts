@@ -1,23 +1,18 @@
 import Stack from "./Stack";
 import * as acorn from "acorn";
 import * as astring from "astring";
-import { Console, EngineParams, ObjFunctionDeclaration, UI } from "./types";
+import { ObjFunctionDeclaration } from "./types";
+import UI from "./ui";
+import WebAPIs from "./webAPIs";
 
 export class Engine {
-  private stack: Stack<acorn.AnyNode>;
   private iterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 20;
-  private console: Console | undefined;
-  private ui: UI | undefined;
   private timeout = 500;
   private funcDeclarations: ObjFunctionDeclaration = {};
 
-  constructor({ stack, console, ui }: EngineParams) {
-    this.stack = stack;
-    this.console = console;
-    this.ui = ui;
-  }
+  constructor(private stack: Stack<acorn.AnyNode>, private ui: UI, private webApi: WebAPIs) {}
 
   run(code: string) {
     this.ui?.disableRunButton();
@@ -53,25 +48,28 @@ export class Engine {
     if (this.stackOverFlowSize === this.stack.size()) {
       this.ui?.callStackStopped();
       this.ui?.enableRunButton();
-      this.ui?.explode(2000);
+      this.ui?.explode(5000);
 
       throw new Error("maximum call stack size exceeded");
     }
 
     if (node.type === "ExpressionStatement") {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
+      if (node.async) {
+        // ! Do something
+      } else {
+        this.stack.push(node);
+        // show the UI we are pushing
+        this.ui?.callStackIsRunning();
 
-      this.stack.push(node);
-      // show the UI we are pushing
-      this.ui?.callStackIsRunning();
+        if (node.expression.type === "CallExpression") {
+          const callExpr = node.expression;
+          if (callExpr.callee.type === "Identifier") {
+            const funcDecl = this.funcDeclarations[callExpr.callee.name];
 
-      if (node.expression.type === "CallExpression") {
-        const callExpr = node.expression;
-        if (callExpr.callee.type === "Identifier") {
-          const funcDecl = this.funcDeclarations[callExpr.callee.name];
-
-          if (funcDecl) {
-            yield* this.iterate(funcDecl.body);
+            if (funcDecl) {
+              yield* this.iterate(funcDecl.body);
+            }
           }
         }
       }
@@ -80,10 +78,10 @@ export class Engine {
     }
 
     // Evaluate
-    if (this.isConsoleLog(node) && this.console) {
+    if (this.isConsoleLog(node) && this.ui.console) {
       if (node.type === "ExpressionStatement") {
         if (node.expression.type === "CallExpression")
-          this.console.log(this.extractArgumentsFromCallExpression(node.expression));
+          this.ui.console.log(this.extractArgumentsFromCallExpression(node.expression));
       }
     }
 

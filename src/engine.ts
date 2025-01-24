@@ -6,7 +6,6 @@ import { Console, EngineParams, ObjFunctionDeclaration, UI } from "./types";
 export class Engine {
   private stack: Stack<acorn.AnyNode>;
   private iterator: Generator | undefined;
-  private currentIterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 20;
   private console: Console | undefined;

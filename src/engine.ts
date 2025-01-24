@@ -11,7 +11,7 @@ export class Engine {
   private stackOverFlowSize = 20;
   private console: Console | undefined;
   private ui: UI | undefined;
-  private timeout = 1000;
+  private timeout = 500;
   private funcDeclarations: ObjFunctionDeclaration = {};
 
   constructor({ stack, console, ui }: EngineParams) {
@@ -24,11 +24,33 @@ export class Engine {
     this.parsedCode = acorn.parse(code, { ecmaVersion: 2020 });
 
     // 1. Create the generator
-    this.iterate(this.parsedCode);
+    this.iterator = this.iterate(this.parsedCode);
+
+    // 2. Drive the generator
+    this.driveGenerator(this.iterator);
   }
 
-  private iterate(node: acorn.AnyNode) {
+  // This function coordinates the generator's async yields
+  private driveGenerator(gen: Generator) {
+    const nextVal = gen.next();
+    if (nextVal.done) {
+      // All done with iteration
+      return;
+    }
+
+    // If the yielded value is a promise, wait for it
+    if (nextVal.value instanceof Promise) {
+      nextVal.value.then(() => this.driveGenerator(gen));
+    } else {
+      // Otherwise, just keep going
+      this.driveGenerator(gen);
+    }
+  }
+
+  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void> {
     if (node.type === "ExpressionStatement") {
+      yield new Promise(resolve => setTimeout(resolve, this.timeout));
+
       this.stack.push(node);
       // show the UI we are pushing
       this.ui?.callStackIsRunning();
@@ -39,7 +61,7 @@ export class Engine {
           const funcDecl = this.funcDeclarations[callExpr.callee.name];
 
           if (funcDecl) {
-            this.iterate(funcDecl.body);
+            yield* this.iterate(funcDecl.body);
           }
         }
       }
@@ -58,12 +80,14 @@ export class Engine {
     // Recurse if this node has a body
     if (Array.isArray((node as any)?.body)) {
       for (let n of (node as any).body) {
-        this.iterate(n);
+        yield* this.iterate(n);
       }
     }
 
     // pop from stack
     if (node.type === "ExpressionStatement") {
+      this.ui?.callStackIsRunning();
+      yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.pop();
       this.ui?.callStackStopped();
     }

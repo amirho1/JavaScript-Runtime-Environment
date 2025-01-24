@@ -21,6 +21,7 @@ export class Engine {
   }
 
   async run(code: string) {
+    this.ui?.disableRunButton();
     this.parsedCode = acorn.parse(code, { ecmaVersion: 2020 });
 
     // 1. Create the generator
@@ -35,6 +36,8 @@ export class Engine {
     const nextVal = gen.next();
     if (nextVal.done) {
       // All done with iteration
+      this.ui?.enableRunButton();
+
       return;
     }
 

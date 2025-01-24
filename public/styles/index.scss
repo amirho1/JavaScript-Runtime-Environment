@@ -204,3 +204,8 @@ body {
   animation: rotating 1s linear;
   animation-iteration-count: infinite;
 }
+
+.disable {
+  pointer-events: none;
+  opacity: 0.5;
+}

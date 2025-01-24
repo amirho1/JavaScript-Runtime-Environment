@@ -27,4 +27,14 @@ export default class Ui extends ExplosiveButton implements UI {
   callStackStopped() {
     this.removeClass("#stack .backdrop", "d-flex");
   }
+
+  enableRunButton() {
+    const run = document.querySelector("#run");
+    if (run && run instanceof HTMLButtonElement) run.disabled = false;
+  }
+
+  disableRunButton() {
+    const run = document.querySelector("#run");
+    if (run && run instanceof HTMLButtonElement) run.disabled = true;
+  }
 }

@@ -6,39 +6,8 @@ import Stack from "./Stack";
 import { Statement } from "acorn";
 import * as astring from "astring";
 import hljs from "highlight.js";
-import javascript from "highlight.js/lib/languages/javascript";
-import { Console, UI } from "./types";
-import ExplosiveButton from "./explosion";
-
-hljs.registerLanguage("javascript", javascript);
-
-class Ui extends ExplosiveButton implements UI {
-  constructor(selector: string) {
-    super(selector);
-    this.addClass = this.addClass.bind(this);
-    this.removeClass = this.removeClass.bind(this);
-    this.callStackIsRunning = this.callStackIsRunning.bind(this);
-    this.callStackStopped = this.callStackStopped.bind(this);
-  }
-
-  addClass(selector: string, classname: string) {
-    const bd = document.querySelector(selector);
-    bd?.classList.add(classname);
-  }
-
-  removeClass(selector: string, classname: string) {
-    const bd = document.querySelector(selector);
-    bd?.classList.remove(classname);
-  }
-
-  callStackIsRunning() {
-    this.addClass("#stack .backdrop", "d-flex");
-  }
-
-  callStackStopped() {
-    this.removeClass("#stack .backdrop", "d-flex");
-  }
-}
+import Ui from "./ui";
+import { Console } from "./types";
 
 export default class Runtime {
   private stack: Stack<Statement>;
@@ -57,14 +26,17 @@ export default class Runtime {
       log.scrollIntoView();
     },
   };
-
   private ui = new Ui("#stack");
 
   constructor(editor: EditorView) {
     this.stack = new Stack<Statement>();
     this.taskQueue = new Queue();
     this.microTaskQueue = new Queue();
-    this.engine = new Engine({ stack: this.stack, console: this.console, ui: this.ui });
+    this.engine = new Engine({
+      stack: this.stack,
+      console: this.console,
+      ui: this.ui,
+    });
     this.eventLoop = new EventLoop();
     this.editor = editor;
 
@@ -94,11 +66,11 @@ export default class Runtime {
 
     element?.appendChild(funcElement);
     funcElement.scrollIntoView();
-    // this.ui.callStackStopped();
+    this.ui.callStackStopped();
   }
 
   removeElementFromCallStackUI() {
     document.getElementById("stack-items-wrapper")?.lastChild?.remove();
-    // this.ui.callStackStopped();
+    this.ui.callStackStopped();
   }
 }

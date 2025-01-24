@@ -20,7 +20,7 @@ export class Engine {
     this.ui = ui;
   }
 
-  async run(code: string) {
+  run(code: string) {
     this.ui?.disableRunButton();
     this.parsedCode = acorn.parse(code, { ecmaVersion: 2020 });
 
@@ -50,7 +50,15 @@ export class Engine {
     }
   }
 
-  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void> {
+  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
+    if (this.stackOverFlowSize === this.stack.size()) {
+      this.ui?.callStackStopped();
+      this.ui?.enableRunButton();
+      this.ui?.explode(2000);
+
+      throw new Error("maximum call stack size exceeded");
+    }
+
     if (node.type === "ExpressionStatement") {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
 

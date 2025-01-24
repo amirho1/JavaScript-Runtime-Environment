@@ -14,3 +14,6 @@ export interface EngineParams {
   ui: UI;
 }
 
+export interface ObjFunctionDeclaration {
+  [key: string]: FunctionDeclaration | AnonymousFunctionDeclaration;
+}

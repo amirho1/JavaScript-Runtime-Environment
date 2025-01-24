@@ -1,18 +1,18 @@
 /**
  * A class representing a Queue data structure.
  */
-export default class Queue {
+export default class Queue<T = any> {
   /**
    * The internal array representing the queue.
    * @private
    */
-  private queue: any[] = [];
+  private queue: T[] = [];
 
   /**
    * Creates an instance of Queue.
    * @param args - Initial elements to populate the queue.
    */
-  constructor(...args: any[]) {
+  constructor(...args: T[]) {
     this.queue = args;
     console.log("hello from queue");
   }
@@ -21,7 +21,7 @@ export default class Queue {
    * Adds an item to the end of the queue.
    * @param item - The item to be added to the queue.
    */
-  public enqueue(item: any) {
+  public enqueue(item: T) {
     this.queue.push(item);
   }
 

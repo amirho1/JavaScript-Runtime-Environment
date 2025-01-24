@@ -1,113 +1,93 @@
 import Stack from "./Stack";
 import * as acorn from "acorn";
 import * as astring from "astring";
-import { Console, EngineParams, UI } from "./types";
+import { Console, EngineParams, ObjFunctionDeclaration, UI } from "./types";
 
 export class Engine {
-  private stack: Stack<acorn.Statement>;
+  private stack: Stack<acorn.AnyNode>;
   private iterator: Generator | undefined;
+  private currentIterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 20;
   private console: Console | undefined;
   private ui: UI | undefined;
-  private timeout = 100;
+  private timeout = 1000;
+  private funcDeclarations: ObjFunctionDeclaration = {};
 
   constructor({ stack, console, ui }: EngineParams) {
     this.stack = stack;
     this.console = console;
     this.ui = ui;
-
-    this.clearStack = this.clearStack.bind(this);
-    this.stack.onPop(() => {
-      const iterator = this.clearStack();
-      const iterate = () => {
-        const result = iterator.next();
-        if (!result.done) {
-          result.value.then(iterate);
-        }
-      };
-      iterate();
-    });
   }
 
-  run(code: string) {
+  async run(code: string) {
     this.parsedCode = acorn.parse(code, { ecmaVersion: 2020 });
-    this.iterator = this.iterate(this.parsedCode?.body);
-    this.iterator.next();
+
+    // 1. Create the generator
+    this.iterate(this.parsedCode);
   }
 
-  *iterate(body: (acorn.Statement | acorn.ModuleDeclaration)[]) {
-    for (const statement of body) {
-      switch (statement.type) {
-        // case "VariableDeclaration":
-        //   yield this.handleVariableDeclaration(statement);
-        //   break;
-        case "ExpressionStatement":
-          this.ui?.callStackIsRunning();
+  private iterate(node: acorn.AnyNode) {
+    if (node.type === "ExpressionStatement") {
+      this.stack.push(node);
+      // show the UI we are pushing
+      this.ui?.callStackIsRunning();
 
-          yield new Promise(resolve => {
-            this.handleExpressionStatement(statement);
-            resolve(true);
-          });
-          break;
+      if (node.expression.type === "CallExpression") {
+        const callExpr = node.expression;
+        if (callExpr.callee.type === "Identifier") {
+          const funcDecl = this.funcDeclarations[callExpr.callee.name];
 
-        // case "IfStatement":
-        //   yield this.handleIfStatement(statement);
-        //   break;
-        // case "WhileStatement":
-        //   yield this.handleWhileStatement(statement);
-        //   break;
-        // case "ForStatement":
-        //   yield this.handleForStatement(statement);
-        //   break;
-        // case "ReturnStatement":
-        //   yield this.handleReturnStatement(statement);
-        //   break;
-        // case "FunctionDeclaration":
-        //   yield this.handleFunctionDeclaration(statement);
-        //   break;
-      }
-    }
-  }
-
-  findFunctionDeclarationByName(name: string) {
-    if (this.parsedCode) {
-      for (const statement of this.parsedCode.body) {
-        if (statement.type === "FunctionDeclaration" && statement.id?.name === name) {
-          return statement;
+          if (funcDecl) {
+            this.iterate(funcDecl.body);
+          }
         }
       }
+    } else if (node.type === "FunctionDeclaration") {
+      if (node.id) this.funcDeclarations[node.id.name] = node;
+    }
+
+    // Evaluate
+    if (this.isConsoleLog(node) && this.console) {
+      if (node.type === "ExpressionStatement") {
+        if (node.expression.type === "CallExpression")
+          this.console.log(this.extractArgumentsFromCallExpression(node.expression));
+      }
+    }
+
+    // Recurse if this node has a body
+    if (Array.isArray((node as any)?.body)) {
+      for (let n of (node as any).body) {
+        this.iterate(n);
+      }
+    }
+
+    // pop from stack
+    if (node.type === "ExpressionStatement") {
+      this.stack.pop();
+      this.ui?.callStackStopped();
     }
   }
 
-  isConsoleLog(topItem: acorn.Statement) {
-    if (topItem.type === "ExpressionStatement" && topItem.expression.type === "CallExpression") {
-      if (topItem.expression.callee.type === "MemberExpression") {
-        if (
-          topItem.expression.callee.object.type === "Identifier" &&
-          topItem.expression.callee.object.name === "console"
-        ) {
+  isConsoleLog(topItem: acorn.AnyNode) {
+    if (topItem.type === "ExpressionStatement") {
+      if (topItem.expression.type === "CallExpression") {
+        if (topItem.expression.callee.type === "MemberExpression") {
           if (
-            topItem.expression.callee.property.type === "Identifier" &&
-            topItem.expression.callee.property.name === "log"
+            topItem.expression.callee.object.type === "Identifier" &&
+            topItem.expression.callee.object.name === "console"
           ) {
-            return true;
+            if (
+              topItem.expression.callee.property.type === "Identifier" &&
+              topItem.expression.callee.property.name === "log"
+            ) {
+              return true;
+            }
           }
         }
       }
     }
-
     return false;
-  }
-
-  expressionStatement(item: acorn.CallExpression) {
-    if (item.callee.type === "Identifier") {
-      const funcDeclaration = this.findFunctionDeclarationByName(item.callee.name);
-      if (funcDeclaration) {
-        this.iterator = this.iterate(funcDeclaration.body.body);
-        this.iterator.next();
-      }
-    }
   }
 
   evaluateBinaryExpression(arg: acorn.BinaryExpression) {
@@ -125,78 +105,9 @@ export class Engine {
           return this.evaluateBinaryExpression(arg);
         case "CallExpression":
           return this.extractArgumentsFromCallExpression(arg);
+        default:
+          return undefined;
       }
     });
-  }
-
-  *clearStack() {
-    while (this.stack.size() > 0) {
-      this.ui?.callStackIsRunning();
-
-      yield new Promise(resolve => {
-        setTimeout(() => {
-          this.stack.pop();
-          this.ui?.callStackStopped();
-          resolve(true);
-        }, this.timeout);
-      });
-    }
-  }
-
-  executeTopStackItem() {
-    if (this.stack.size() > this.stackOverFlowSize) {
-      this.ui?.callStackStopped();
-      this.ui?.explode(2000);
-      throw new Error("Maximum call stack size exceeded");
-    }
-    const topItem = this.stack.peek();
-
-    if (this.isConsoleLog(topItem)) {
-      setTimeout(() => {
-        this.stack.pop();
-        if (
-          this.console &&
-          topItem.type === "ExpressionStatement" &&
-          topItem.expression.type === "CallExpression"
-        )
-          this.console.log(this.extractArgumentsFromCallExpression(topItem.expression));
-      }, this.timeout);
-    } else if (
-      topItem.type === "ExpressionStatement" &&
-      topItem.expression.type === "CallExpression"
-    ) {
-      this.expressionStatement(topItem.expression);
-    }
-  }
-
-  handleExpressionStatement(statement: acorn.Statement) {
-    return setTimeout(() => {
-      this.stack.push(statement);
-      this.executeTopStackItem();
-    }, this.timeout);
-  }
-
-  handleVariableDeclaration(_statement: acorn.Statement) {
-    console.log("VariableDeclaration");
-  }
-
-  handleIfStatement(_statement: acorn.Statement) {
-    console.log("IfStatement");
-  }
-
-  handleWhileStatement(_statement: acorn.Statement) {
-    console.log("WhileStatement");
-  }
-
-  handleForStatement(_statement: acorn.Statement) {
-    console.log("ForStatement");
-  }
-
-  handleReturnStatement(_statement: acorn.Statement) {
-    console.log("ReturnStatement");
-  }
-
-  handleFunctionDeclaration(_statement: acorn.Statement) {
-    console.log("FunctionDeclaration");
   }
 }

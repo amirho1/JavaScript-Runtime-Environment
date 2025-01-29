@@ -28,14 +28,26 @@ export const setTimeoutCodeSnippet = `setTimeout(() => {
 
 console.log("End of script");`;
 
-export const sampleCode2 = `function one() {
-  console.log('hello from one')
+export const stackOverFlowsampleCode2 = `function one() {
+  two()
 }
 
 function two() {
-  console.log('hello from two')
+  one()
 }
 
 one();
 two();
+`;
+
+export const asyncSample = `async function asyncFunc() {
+  console.log("Async function");
+}
+
+asyncFunc();
+`;
+
+export const setTimeout = `setTimeout(() => {
+  console.log("Timeout function");
+}, 0);
 `;

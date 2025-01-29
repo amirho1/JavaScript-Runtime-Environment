@@ -1,3 +1,5 @@
+import { Statement } from "acorn";
+
 export interface Console {
   log: (...args: any[]) => void;
 }
@@ -14,5 +16,5 @@ export interface ObjFunctionDeclaration {
 }
 
 export interface Task {
-  [key: string]: Function;
+  [key: string]: Expression;
 }

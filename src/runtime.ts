@@ -19,12 +19,12 @@ export default class Runtime {
   constructor(private editor: EditorView) {
     this.stack = new Stack<Statement>();
     this.taskQueue = new Queue();
-    this.webApi = new WebAPIs(this.taskQueue);
     this.microTaskQueue = new Queue();
     this.ui = new Ui("#stack", this.stack);
+    this.webApi = new WebAPIs(this.taskQueue, this.ui);
     this.engine = new Engine(this.stack, this.ui, this.webApi);
 
-    this.eventLoop = new EventLoop();
+    this.eventLoop = new EventLoop(this.ui);
   }
 
   run() {

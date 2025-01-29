@@ -1,5 +1,9 @@
+import Ui from "./ui";
+
 export default class EventLoop {
-  constructor() {
-    console.log("hello from event loop");
+  constructor(private ui: Ui) {}
+
+  run() {
+    
   }
 }

@@ -44,7 +44,16 @@ export class Engine {
     }
   }
 
-  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
+  isSetTimeout(node: acorn.AnyNode) {
+    return (
+      node.type === "ExpressionStatement" &&
+      node.expression.type === "CallExpression" &&
+      node.expression.callee.type === "Identifier" &&
+      node.expression.callee.name === "setTimeout"
+    );
+  }
+
+  captureStackOverFlow() {
     if (this.stackOverFlowSize === this.stack.size()) {
       this.ui?.callStackStopped();
       this.ui?.enableRunButton();
@@ -52,38 +61,49 @@ export class Engine {
 
       throw new Error("maximum call stack size exceeded");
     }
+  }
 
-    if (node.type === "ExpressionStatement") {
-      yield new Promise(resolve => setTimeout(resolve, this.timeout));
-      if (node.async) {
-        // ! Do something
-      } else {
-        this.stack.push(node);
-        // show the UI we are pushing
-        this.ui?.callStackIsRunning();
-
-        if (node.expression.type === "CallExpression") {
-          const callExpr = node.expression;
-          if (callExpr.callee.type === "Identifier") {
-            const funcDecl = this.funcDeclarations[callExpr.callee.name];
-
-            if (funcDecl) {
-              yield* this.iterate(funcDecl.body);
-            }
-          }
-        }
-      }
-    } else if (node.type === "FunctionDeclaration") {
-      if (node.id) this.funcDeclarations[node.id.name] = node;
-    }
-
-    // Evaluate
+  evaluate(node: acorn.AnyNode) {
     if (this.isConsoleLog(node) && this.ui.console) {
       if (node.type === "ExpressionStatement") {
         if (node.expression.type === "CallExpression")
           this.ui.console.log(this.extractArgumentsFromCallExpression(node.expression));
       }
     }
+  }
+
+  *handleExpressionStatements(node: acorn.AnyNode, isSetTimeout: boolean) {
+    if (node.type === "ExpressionStatement") {
+      yield new Promise(resolve => setTimeout(resolve, this.timeout));
+      this.stack.push(node);
+
+      // show the UI we are pushing
+      this.ui?.callStackIsRunning();
+      if (node.expression.type === "CallExpression" && !isSetTimeout) {
+        const callExpr = node.expression;
+        if (callExpr.callee.type === "Identifier") {
+          const funcDecl = this.funcDeclarations[callExpr.callee.name];
+          if (funcDecl.async) {
+            this.webApi.asyncFunction(node);
+          } else {
+            yield* this.iterate(funcDecl.body);
+          }
+        }
+      }
+    } else if (node.type === "FunctionDeclaration") {
+      if (node.id) this.funcDeclarations[node.id.name] = node;
+    }
+  }
+
+  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
+    this.captureStackOverFlow();
+
+    const isSetTimeout = this.isSetTimeout(node);
+
+    yield* this.handleExpressionStatements(node, isSetTimeout);
+
+    // Evaluate
+    this.evaluate(node);
 
     // Recurse if this node has a body
     if (Array.isArray((node as any)?.body)) {
@@ -98,6 +118,9 @@ export class Engine {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.pop();
       this.ui?.callStackStopped();
+    }
+    if (isSetTimeout) {
+      this.webApi.setTimeout(node.expression, node.expression.arguments[1].value);
     }
   }
 

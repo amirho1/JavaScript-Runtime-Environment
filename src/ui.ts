@@ -1,12 +1,10 @@
 import ExplosiveButton from "./explosion";
 import Stack from "./Stack";
-import * as astring from "astring";
 import hljs from "highlight.js";
+import * as astring from "astring";
 import * as acorn from "acorn";
 
-
 export default class Ui extends ExplosiveButton {
-  
   constructor(stackSelector: string, private stack: Stack<acorn.Statement>) {
     super(stackSelector);
     this.addClass = this.addClass.bind(this);
@@ -16,6 +14,8 @@ export default class Ui extends ExplosiveButton {
 
     this.addElementFromCallStackToUI = this.addElementFromCallStackToUI.bind(this);
     this.removeElementFromCallStackUI = this.removeElementFromCallStackUI.bind(this);
+    this.removeLastElementFromWebAPIsUI = this.removeLastElementFromWebAPIsUI.bind(this);
+    this.addElementToWebAPIsUI = this.addElementToWebAPIsUI.bind(this);
 
     this.stack.onPush(this.addElementFromCallStackToUI);
     this.stack.onPop(this.removeElementFromCallStackUI);
@@ -60,10 +60,15 @@ export default class Ui extends ExplosiveButton {
     if (run && run instanceof HTMLButtonElement) run.disabled = true;
   }
 
-  addElementFromCallStackToUI() {
-    const element = document.getElementById("stack-items-wrapper");
+  createFunctionElementAndAppend({
+    appendToSelector,
+    code,
+  }: {
+    appendToSelector: string;
+    code: string;
+  }) {
+    const element = document.querySelector(appendToSelector);
     const funcElement = document.createElement("div");
-    const code = astring.generate(this.stack.peek());
     const highlightedCode = hljs.highlight(code, { language: "javascript" }).value;
 
     funcElement.innerHTML = highlightedCode;
@@ -73,7 +78,40 @@ export default class Ui extends ExplosiveButton {
     funcElement.scrollIntoView();
   }
 
+  addElementFromCallStackToUI() {
+    this.createFunctionElementAndAppend({
+      code: astring.generate(this.stack.peek()),
+      appendToSelector: "#stack-items-wrapper",
+    });
+  }
+
+  removeLastChildFromSelected(selector: string) {
+    document.querySelector(selector)?.lastChild?.remove();
+  }
+
   removeElementFromCallStackUI() {
-    document.getElementById("stack-items-wrapper")?.lastChild?.remove();
+    this.removeLastChildFromSelected("#stack-items-wrapper");
+  }
+
+  addElementToWebAPIsUI(code: string) {
+    this.createFunctionElementAndAppend({
+      code: code,
+      appendToSelector: "#web-apis-items-wrapper",
+    });
+  }
+
+  removeLastElementFromWebAPIsUI() {
+    this.removeLastChildFromSelected("#web-apis-items-wrapper");
+  }
+
+  addElementToTaskQueueUI(code: string) {
+    this.createFunctionElementAndAppend({
+      code: code,
+      appendToSelector: "#task-queue-items-wrapper",
+    });
+  }
+
+  removeTheFirstElementFromTaskQueue() {
+    document.querySelector("#task-queue-items-wrapper")?.firstChild?.remove();
   }
 }

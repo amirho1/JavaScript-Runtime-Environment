@@ -22,7 +22,6 @@ export class Engine {
   }
 
   run(code: string) {
-    this.ui?.disableRunButton();
     this.parsedCode = acorn.parse(code, { ecmaVersion: 2020 });
 
     // 1. Create the generator
@@ -34,6 +33,7 @@ export class Engine {
 
   // This function coordinates the generator's async yields
   driveGenerator(gen: Generator) {
+    this.ui?.disableRunButton();
     this.isStackEmpty.value = false;
     const nextVal = gen.next();
 

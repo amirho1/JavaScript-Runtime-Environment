@@ -36,7 +36,6 @@ export default class EventLoop {
           const iterator = engine.iterate(microtask);
           engine.driveGenerator(iterator);
           setTimeout(this.microTaskQueue.dequeue, 500);
-          return;
         } else {
           // 2. If no microtask, check the task queue
           const task = this.taskQueue.peek();

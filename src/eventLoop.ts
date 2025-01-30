@@ -35,8 +35,7 @@ export default class EventLoop {
         if (microtask) {
           const iterator = engine.iterate(microtask);
           engine.driveGenerator(iterator);
-          this.microTaskQueue.dequeue();
-
+          setTimeout(this.microTaskQueue.dequeue, 500);
           return;
         } else {
           // 2. If no microtask, check the task queue
@@ -44,7 +43,7 @@ export default class EventLoop {
           if (task) {
             const iterator = engine.iterate(task);
             engine.driveGenerator(iterator);
-            this.taskQueue.dequeue();
+            setTimeout(this.taskQueue.dequeue, 500);
           } else {
             // 3. If both queues are empty, stop the loop
             if (this.intervalId) {

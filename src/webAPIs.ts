@@ -2,13 +2,12 @@ import { Statement } from "acorn";
 import Queue from "./Queue";
 import { Task } from "./types";
 import { v4 } from "uuid";
-import Ui from "./ui";
 import { Expression } from "acorn";
 
 export default class WebAPIs {
   private tasks: Task;
 
-  constructor(private taskQueue: Queue<Statement>, private ui: Ui, map: Task) {
+  constructor(private taskQueue: Queue<Statement>, map: Task) {
     this.tasks = map;
   }
 

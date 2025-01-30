@@ -1,37 +1,32 @@
 import { EditorView } from "codemirror";
 import { Engine } from "./engine";
 import EventLoop from "./eventLoop";
-import Queue from "./Queue";
-import Stack from "./Stack";
 import { Statement } from "acorn";
 import Ui from "./ui";
 import WebAPIs from "./webAPIs";
+import Stack from "./Stack";
+import Queue from "./Queue";
 
 export default class Runtime {
-  private stack: Stack<Statement>;
-  private taskQueue: Queue<Statement>;
-  private microTaskQueue: Queue<Statement>;
-  private engine: Engine;
-  private eventLoop: EventLoop;
-  private webApi: WebAPIs | undefined;
-  private ui: Ui;
+  private stack = new Stack<Statement>();
+  private taskQueue = new Queue<Statement>();
+  private microTaskQueue = new Queue<Statement>();
+  private map = new Map();
+  private ui = new Ui("#stack", this.stack, this.taskQueue, this.microTaskQueue, this.map);
+  private eventLoop = new EventLoop(this.ui);
+  private webApi = new WebAPIs(this.taskQueue, this.ui, this.map);
+  private engine = new Engine(this.stack, this.ui, this.webApi);
 
-  constructor(private editor: EditorView) {
-    this.stack = new Stack<Statement>();
-    this.taskQueue = new Queue();
-    this.microTaskQueue = new Queue();
-    this.ui = new Ui("#stack", this.stack);
-    this.webApi = new WebAPIs(this.taskQueue, this.ui);
-    this.engine = new Engine(this.stack, this.ui, this.webApi);
-
-    this.eventLoop = new EventLoop(this.ui);
-  }
+  constructor(private editor: EditorView) {}
 
   run() {
     const stackItemWrapper = document.getElementById("stack-items-wrapper");
     if (stackItemWrapper) stackItemWrapper.innerHTML = "";
-    this.stack.clear();
 
+    this.stack.clear();
+    this.taskQueue.clear();
+    this.microTaskQueue.clear();
     this.engine.run(this.editor.state.doc.toString());
+    this.map.clear();
   }
 }

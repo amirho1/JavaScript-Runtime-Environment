@@ -1,6 +1,9 @@
+import ObservableMethods from "./ObservableMethod";
+
 /**
  * A class representing a Queue data structure.
  */
+@ObservableMethods
 export default class Queue<T = any> {
   /**
    * The internal array representing the queue.
@@ -14,7 +17,6 @@ export default class Queue<T = any> {
    */
   constructor(...args: T[]) {
     this.queue = args;
-    console.log("hello from queue");
   }
 
   /**
@@ -55,5 +57,13 @@ export default class Queue<T = any> {
    */
   size() {
     return this.queue.length;
+  }
+
+  /**
+   * Clears all the elements in the queue.
+   * This method resets the queue to an empty state.
+   */
+  clear() {
+    this.queue = [];
   }
 }

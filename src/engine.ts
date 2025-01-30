@@ -12,7 +12,14 @@ export class Engine {
   private timeout = 500;
   private funcDeclarations: ObjFunctionDeclaration = {};
 
-  constructor(private stack: Stack<acorn.AnyNode>, private ui: UI, private webApi: WebAPIs) {}
+  constructor(
+    private stack: Stack<acorn.AnyNode>,
+    private ui: UI,
+    private webApi: WebAPIs,
+    private isStackEmpty: { value: boolean }
+  ) {
+    this.iterate = this.iterate.bind(this);
+  }
 
   run(code: string) {
     this.ui?.disableRunButton();
@@ -26,12 +33,14 @@ export class Engine {
   }
 
   // This function coordinates the generator's async yields
-  private driveGenerator(gen: Generator) {
+  driveGenerator(gen: Generator) {
+    this.isStackEmpty.value = false;
     const nextVal = gen.next();
+
     if (nextVal.done) {
+      this.isStackEmpty.value = true;
       // All done with iteration
       this.ui?.enableRunButton();
-
       return;
     }
 
@@ -76,7 +85,6 @@ export class Engine {
     if (node.type === "ExpressionStatement") {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.push(node);
-
       // show the UI we are pushing
       this.ui?.callStackIsRunning();
       if (node.expression.type === "CallExpression" && !isSetTimeout) {
@@ -90,12 +98,20 @@ export class Engine {
           }
         }
       }
+    } else if (node.type === "ArrowFunctionExpression") {
+      yield new Promise(resolve => setTimeout(resolve, this.timeout));
+      this.stack.push(node);
+
+      this.ui?.callStackIsRunning();
+      yield* this.iterate(node.body);
     } else if (node.type === "FunctionDeclaration") {
       if (node.id) this.funcDeclarations[node.id.name] = node;
     }
   }
 
-  private *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
+  *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
+    console.log(node, "node");
+
     this.captureStackOverFlow();
 
     const isSetTimeout = this.isSetTimeout(node);
@@ -113,7 +129,7 @@ export class Engine {
     }
 
     // pop from stack
-    if (node.type === "ExpressionStatement") {
+    if (node.type === "ExpressionStatement" || node.type === "ArrowFunctionExpression") {
       this.ui?.callStackIsRunning();
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.pop();

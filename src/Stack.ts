@@ -1,10 +1,13 @@
+import ObservableMethods from "./ObservableMethod";
+
 /**
  * A class representing a stack data structure.
  *
  * @class Stack
  * @template T - The type of items held in the stack.
  */
-export default class Stack<T> {
+@ObservableMethods
+export default class Stack<T = any> {
   /**
    * The internal array that holds the stack items.
    *
@@ -12,22 +15,6 @@ export default class Stack<T> {
    * @type {T[]}
    */
   private stack: any[] = [];
-
-  /**
-   * The internal array that holds the subscribed events for push.
-   *
-   * @private
-   * @type {Function[]}
-   */
-  private pushEvents: Function[] = [];
-
-  /**
-   * The internal array that holds the subscribed events for push.
-   *
-   * @private
-   * @type {Function[]}
-   */
-  private popEvents: Function[] = [];
 
   /**
    * Creates an instance of Stack.
@@ -40,11 +27,8 @@ export default class Stack<T> {
     this.peek = this.peek.bind(this);
     this.isEmpty = this.isEmpty.bind(this);
     this.size = this.size.bind(this);
-    this.onPush = this.onPush.bind(this);
-    this.onPop = this.onPop.bind(this);
-    this.handlePushEvents = this.handlePushEvents.bind(this);
-    this.handlePopEvents = this.handlePopEvents.bind(this);
     this.clear = this.clear.bind(this);
+    this.push = this.push.bind(this);
   }
 
   /**
@@ -55,8 +39,6 @@ export default class Stack<T> {
    */
   push(arg: T) {
     const length = this.stack.push(arg);
-    this.handlePushEvents();
-    this.handlePushEvents.bind(this);
     return length;
   }
 
@@ -67,7 +49,6 @@ export default class Stack<T> {
    */
   pop(): T {
     const item = this.stack.pop();
-    this.handlePopEvents();
     return item;
   }
 
@@ -96,34 +77,6 @@ export default class Stack<T> {
    */
   size() {
     return this.stack.length;
-  }
-
-  /**
-   * Add callback to the pushEvents array.
-   */
-  onPush(fn: () => any) {
-    this.pushEvents.push(fn);
-  }
-
-  /**
-   * Add callback to the popEvents array.
-   */
-  onPop(fn: () => any) {
-    this.popEvents.push(fn);
-  }
-
-  /**
-   * Execute all the callbacks in the changeEvents array.
-   */
-  handlePushEvents() {
-    this.pushEvents.forEach(fn => fn());
-  }
-
-  /**
-   * Execute all the callbacks in the popEvents array.
-   */
-  handlePopEvents() {
-    this.popEvents.forEach(fn => fn());
   }
 
   /**

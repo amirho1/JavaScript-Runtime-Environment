@@ -17,7 +17,13 @@ export default class Runtime {
   private ui = new Ui("#stack", this.stack, this.taskQueue, this.microTaskQueue, this.map);
   private eventLoop = new EventLoop(this.microTaskQueue, this.taskQueue, this.isStackEmpty);
   private webApi = new WebAPIs(this.taskQueue, this.map);
-  private engine = new Engine(this.stack, this.ui, this.webApi, this.isStackEmpty);
+  private engine = new Engine(
+    this.stack,
+    this.ui,
+    this.webApi,
+    this.isStackEmpty,
+    this.microTaskQueue
+  );
 
   constructor(private editor: EditorView) {}
 

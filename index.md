@@ -1,13 +1,8 @@
-1.heap
-2.stack
-3. memory allocation
-4. execution 
-5. webAPis {
-  dome 
-  ajax
-  settimeout
-}
-6. event loop
-7.callback queue
-one thread == one call stack == one thing at atime
-rerendering of browser 16.6ms micro and mini queue
+  console.log(`
+ **********************************************
+    \n This App was written by Amirhossein salighedar
+    \n **********************************************
+    \n github: https://github.com/amirho1/JavaScript-Runtime-Environment
+    \n **********************************************
+    \n email: mailto://amirhosseinsalighedar@gmail.com
+    `)

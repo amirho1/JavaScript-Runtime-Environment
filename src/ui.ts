@@ -29,6 +29,9 @@ export default class Ui extends ExplosiveButton {
     this.addElementToTaskQueueUI = this.addElementToTaskQueueUI.bind(this);
     this.removeTheFirstElementFromTaskQueue = this.removeTheFirstElementFromTaskQueue.bind(this);
     this.clearChildElements = this.clearChildElements.bind(this);
+    this.addElementToMicroTaskQueue = this.addElementToMicroTaskQueue.bind(this);
+    this.removeTheFirstElementFromMicroTaskQueue =
+      this.removeTheFirstElementFromMicroTaskQueue.bind(this);
 
     // ** Add event listeners
     this.stack.on("push", this.addElementToCallStackToUI);
@@ -41,6 +44,23 @@ export default class Ui extends ExplosiveButton {
     this.taskQueue.on("enqueue", this.addElementToTaskQueueUI);
     this.taskQueue.on("dequeue", this.removeTheFirstElementFromTaskQueue);
     this.taskQueue.on("clear", () => this.clearChildElements("#task-queue-items-wrapper"));
+
+    this.microTaskQueue.on("enqueue", this.addElementToMicroTaskQueue);
+    this.microTaskQueue.on("dequeue", this.removeTheFirstElementFromMicroTaskQueue);
+    this.microTaskQueue.on("clear", () =>
+      this.clearChildElements("#micro-task-queue-items-wrapper")
+    );
+  }
+
+  addElementToMicroTaskQueue() {
+    this.createFunctionElementAndAppend({
+      code: astring.generate(this.microTaskQueue.peek()),
+      appendToSelector: "#micro-task-queue-items-wrapper",
+    });
+  }
+
+  removeTheFirstElementFromMicroTaskQueue() {
+    document.querySelector("#micro-task-queue-items-wrapper")?.firstChild?.remove();
   }
 
   console = {

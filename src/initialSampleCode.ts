@@ -1,7 +1,9 @@
 export const sampleCode1 = `console.log("Hello, World!");
 
 async function asyncFunc() {
-  console.log("Async function");
+
+  await console.log("Async function");
+  console.log("after await 0")
 }
 
 setTimeout(() => {
@@ -41,13 +43,38 @@ two();
 `;
 
 export const asyncSample = `async function asyncFunc() {
-  console.log("Async function");
+  await console.log("Async function");
+  console.log("after await 0")
+  console.log("after await 1")
 }
 
-asyncFunc();
+asyncFunc()
+
+console.log('end')
+`;
+
+export const promise = `new Promise((resolve, reject) => {
+  console.log("Promise function");
+}).then(() => {
+console.log("then");
+});
+
+console.log('end')
 `;
 
 export const setTimeout = `setTimeout(() => {
   console.log("Timeout function");
 }, 0);
+`;
+
+export const start = `setTimeout(() => {
+  console.log("inside setTimeout");
+}, 0);
+
+async function one() {
+  await console.log("one");
+  one();
+}
+
+one();
 `;

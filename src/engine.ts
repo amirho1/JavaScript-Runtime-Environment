@@ -4,19 +4,20 @@ import * as astring from "astring";
 import { ObjFunctionDeclaration } from "./types";
 import UI from "./ui";
 import WebAPIs from "./webAPIs";
-
+import Queue from "./Queue";
 export class Engine {
   private iterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 20;
-  private timeout = 500;
+  private timeout = 2000;
   private funcDeclarations: ObjFunctionDeclaration = {};
 
   constructor(
     private stack: Stack<acorn.AnyNode>,
     private ui: UI,
     private webApi: WebAPIs,
-    private isStackEmpty: { value: boolean }
+    private isStackEmpty: { value: boolean },
+    private microTaskQueue: Queue<acorn.AnyNode>
   ) {
     this.iterate = this.iterate.bind(this);
   }
@@ -77,11 +78,33 @@ export class Engine {
       if (node.type === "ExpressionStatement") {
         if (node.expression.type === "CallExpression")
           this.ui.console.log(this.extractArgumentsFromCallExpression(node.expression));
+        else if (node.expression.type === "AwaitExpression") {
+          this.ui.console.log(this.extractArgumentsFromCallExpression(node.expression.argument));
+        }
       }
     }
   }
 
-  *handleExpressionStatements(node: acorn.AnyNode, isSetTimeout: boolean) {
+  splitAfterAwaitToNewNode(node: acorn.FunctionDeclaration) {
+    if (node.body.body.some(n => n.expression.type === "AwaitExpression")) {
+      const copiedBody = [...node.body.body];
+      const awaitIndex = copiedBody.findIndex(n => n.expression.type === "AwaitExpression");
+
+      const body = copiedBody.splice(awaitIndex + 1, copiedBody.length - 1).map(n => {
+        n.microTask = true;
+        return n;
+      });
+
+      const newNode = {
+        ...node,
+        body: { ...node.body, body: [...copiedBody, { body }] },
+      };
+      return newNode;
+    }
+    return node;
+  }
+
+  *handleNodeExecution(node: acorn.AnyNode, isSetTimeout: boolean) {
     if (node.type === "ExpressionStatement") {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.push(node);
@@ -92,7 +115,7 @@ export class Engine {
         if (callExpr.callee.type === "Identifier") {
           const funcDecl = this.funcDeclarations[callExpr.callee.name];
           if (funcDecl.async) {
-            this.webApi.asyncFunction(node);
+            yield* this.iterate(this.splitAfterAwaitToNewNode(funcDecl).body as any);
           } else {
             yield* this.iterate(funcDecl.body);
           }
@@ -101,7 +124,6 @@ export class Engine {
     } else if (node.type === "ArrowFunctionExpression") {
       yield new Promise(resolve => setTimeout(resolve, this.timeout));
       this.stack.push(node);
-
       this.ui?.callStackIsRunning();
       yield* this.iterate(node.body);
     } else if (node.type === "FunctionDeclaration") {
@@ -110,13 +132,17 @@ export class Engine {
   }
 
   *iterate(node: acorn.AnyNode): Generator<Promise<any> | void | any> {
-    console.log(node, "node");
+    if (node.microTask) {
+      const copied = JSON.parse(JSON.stringify(node));
+      delete copied.microTask;
+      return this.microTaskQueue.enqueue(copied);
+    }
 
     this.captureStackOverFlow();
 
     const isSetTimeout = this.isSetTimeout(node);
 
-    yield* this.handleExpressionStatements(node, isSetTimeout);
+    yield* this.handleNodeExecution(node, isSetTimeout);
 
     // Evaluate
     this.evaluate(node);
@@ -141,20 +167,29 @@ export class Engine {
   }
 
   isConsoleLog(topItem: acorn.AnyNode) {
-    if (topItem.type === "ExpressionStatement") {
-      if (topItem.expression.type === "CallExpression") {
-        if (topItem.expression.callee.type === "MemberExpression") {
-          if (
-            topItem.expression.callee.object.type === "Identifier" &&
-            topItem.expression.callee.object.name === "console"
-          ) {
-            if (
-              topItem.expression.callee.property.type === "Identifier" &&
-              topItem.expression.callee.property.name === "log"
-            ) {
-              return true;
-            }
-          }
+    // Must be an expression statement
+    if (topItem.type !== "ExpressionStatement") return false;
+
+    // Get the actual expression (call or await) from topItem
+    let expression = topItem.expression;
+
+    // If it's `await <something>`, unwrap the `AwaitExpression`
+    if (expression.type === "AwaitExpression") {
+      expression = expression.argument; // The thing being awaited
+    }
+
+    // Now check if expression is a direct call to console.log
+    if (expression.type === "CallExpression") {
+      if (expression.callee.type === "MemberExpression") {
+        const calleeObj = expression.callee.object;
+        const calleeProp = expression.callee.property;
+        if (
+          calleeObj.type === "Identifier" &&
+          calleeObj.name === "console" &&
+          calleeProp.type === "Identifier" &&
+          calleeProp.name === "log"
+        ) {
+          return true;
         }
       }
     }

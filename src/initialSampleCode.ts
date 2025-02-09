@@ -53,15 +53,6 @@ asyncFunc()
 console.log('end')
 `;
 
-export const promise = `new Promise((resolve, reject) => {
-  console.log("Promise function");
-}).then(() => {
-console.log("then");
-});
-
-console.log('end')
-`;
-
 export const setTimeout = `setTimeout(() => {
   console.log("Timeout function");
 }, 0);

@@ -21,4 +21,6 @@ bun dev
 ```
 open your http://localhost:3000 you will see the project
 
+**this runtime only handles `async await`, `function`, and `setTimeout` it was written for educational purpose**
+
 <!-- Developed by AmirHossein Salighedar -->

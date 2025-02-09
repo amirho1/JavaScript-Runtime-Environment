@@ -1,15 +1,29 @@
-# event-loop
+# Javascript Runtime visualization
 
-To install dependencies:
+## [Demo](https://amirho1.github.io/JavaScript-Runtime-Environment/)
 
-```bash
+This is a fun project that I did to learn behind the scene of javascript and it's limited if you run it, it will parse and iterate the code and show you step by step what will happen when you call async, and sync functions
+
+## Clone it
+
+```sh
+git clone https://github.com/amirho1/JavaScript-Runtime-Environment.git
+```
+
+### Install and Run
+
+```sh
 bun install
 ```
 
-To run:
+#### Run
 
-```bash
-bun run index.ts
+```sh
+bun dev
 ```
 
-This project was created using `bun init` in bun v1.1.3. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+open your http://localhost:3000 you will see the project
+
+**this runtime only handles `async await`, `function`, and `setTimeout` it was written for educational purpose**
+
+<!-- Developed by AmirHossein Salighedar -->

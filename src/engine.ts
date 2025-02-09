@@ -9,7 +9,7 @@ export class Engine {
   private iterator: Generator | undefined;
   private parsedCode: acorn.Program | undefined;
   private stackOverFlowSize = 20;
-  private timeout = 2000;
+  private timeout = 500;
   private funcDeclarations: ObjFunctionDeclaration = {};
 
   constructor(

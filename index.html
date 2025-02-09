@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Primary Meta Tags -->
+    <meta
+      name="description"
+      content="Visualize and interact with the JavaScript runtime environment."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <title>JavaScript Runtime Visualized</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:title" content="JavaScript Runtime Visualized" />
+    <meta
+      property="og:description"
+      content="Visualize and interact with the JavaScript runtime environment."
+    />
+    <meta property="og:image" content="./assets/javascriptRuntime.png" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JavaScript Runtime Visualized" />
+    <meta
+      name="twitter:description"
+      content="Visualize and interact with the JavaScript runtime environment."
+    />
+    <meta name="twitter:image" content="./assets/javascriptRuntime.png" />
+
+    <script type="module" crossorigin src="./assets/index-CdzPCIIB.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-9_Q30KpP.css" />
+  </head>
+  <body>
+    <!-- Header with main heading and brief description -->
+    <header>
+      <h1>JavaScript Runtime Visualized</h1>
+      <p>Visualize and interact with the JavaScript runtime environment.</p>
+    </header>
+
+    <!-- Main content area -->
+    <main>
+      <section id="project-top-wrapper">
+        <section id="editor-wrapper">
+          <div id="editor"></div>
+          <div id="button-wrapper">
+            <button id="run">Run</button>
+          </div>
+        </section>
+
+        <section id="runtime-top-wrapper">
+          <div class="box" id="stack">
+            <header class="title-wrapper">
+              <h2 class="title">Call Stack</h2>
+            </header>
+
+            <div class="backdrop">
+              <img
+                width="50"
+                height="50"
+                class="rotation-animation"
+                src="./assets/rotate.svg"
+                alt="Icon illustrating rotation animation"
+              />
+            </div>
+            <div id="stack-items-wrapper"></div>
+          </div>
+
+          <div class="box" id="web-apis">
+            <header class="title-wrapper">
+              <h2 class="title">Web APIs</h2>
+            </header>
+            <div class="backdrop">
+              <img
+                width="50"
+                height="50"
+                class="rotation-animation"
+                src="./assets/rotate.svg"
+                alt="Icon illustrating rotation animation"
+              />
+            </div>
+            <div id="web-apis-items-wrapper"></div>
+          </div>
+        </section>
+      </section>
+
+      <section id="project-bottom-wrapper">
+        <div class="box" id="console">
+          <header class="title-wrapper">
+            <h2 class="title">Console</h2>
+          </header>
+          <div class="item-wrapper"></div>
+        </div>
+
+        <section id="runtime-bottom-wrapper">
+          <div id="event-loop">
+            <h3>Event Loop</h3>
+            <img
+              width="50"
+              height="50"
+              src="./assets/rotate.svg"
+              alt="Javascript event loop rotate icon"
+            />
+          </div>
+
+          <div class="box" id="task-queue">
+            <header class="title-wrapper">
+              <h3 class="title">Task Queue</h3>
+            </header>
+            <div id="task-queue-items-wrapper"></div>
+          </div>
+
+          <div class="box" id="micro-task-queue">
+            <header class="title-wrapper">
+              <h3 class="title">Micro Task Queue</h3>
+            </header>
+            <div id="micro-task-queue-items-wrapper"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <!-- Scripts -->
+  </body>
+</html>

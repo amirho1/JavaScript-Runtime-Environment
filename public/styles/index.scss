@@ -209,3 +209,10 @@ body {
   pointer-events: none;
   opacity: 0.5;
 }
+
+#author {
+  margin-top: 1rem;
+  & * {
+    color: white;
+  }
+}
